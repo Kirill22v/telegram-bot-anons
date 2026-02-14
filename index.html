@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Анонимный бот • Создай свою ссылку</title>
     
-    <!-- FAVICON (простая рабочая иконка) -->
+    <!-- FAVICON (красная молния) -->
     <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAA3ElEQVR4Ae2VAQ0CIRAE7UENakADGtCABjSgAQ1oQAMa0IAGNLABDfBmJzb/vUf27m42mUTeZC6ECxcOhoFWa7Vaq9VqrfYbAECM6aCqo6p6a61b77/3blXH1tqoqpvMTFV3qjoC4EtmAICI2NbaqrW2y2wPAK21TUR2mb2IyBYRd5ntAcCqOqrqEhG7zL6qYkRcZLYXEVvEpohYIuIKAC+qCgBYVXeZzTkvEXGp6gIAl4i4AEBVl4i4iYhTRAQAqKoCwO8fLyJiVV0iYgWA1b+IuFVVASDWv4i4iYhTVRUAov5FxE1EnKoKAFH/IuImIk5VBQBV/YuI9e9f1Gq1Wq3VarVaa7VW+wJ7z9k5T6iIqAAAAABJRU5ErkJggg==">
     
     <style>
@@ -916,7 +916,6 @@
 
         <!-- РЕЖИМ 2: ОТПРАВКА СООБЩЕНИЯ -->
         <div id="sendSection" class="section section-hidden">
-            
             <!-- Блок получателя -->
             <div class="user-id-block" style="margin-bottom: 20px;">
                 <span class="user-id-label">ПОЛУЧАТЕЛЬ:</span>
@@ -988,9 +987,6 @@
         const statusText = document.getElementById('statusText');
         const statusTime = document.getElementById('statusTime');
         const toast = document.getElementById('toast');
-        
-        // Кнопка возврата
-        const backToCreateBtn = document.getElementById('backToCreateBtn');
 
         // ============================================
         // СОЗДАНИЕ ЧАСТИЦ
@@ -1077,9 +1073,6 @@
         // ============================================
         modeCreateBtn.addEventListener('click', switchToCreateMode);
         modeSendBtn.addEventListener('click', switchToSendMode);
-        
-        // Обработчик кнопки "Вернуться к созданию ссылки"
-        backToCreateBtn.addEventListener('click', switchToCreateMode);
 
         // ============================================
         // СОЗДАНИЕ ССЫЛКИ ПО ID
