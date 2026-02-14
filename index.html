@@ -278,6 +278,34 @@
             color: white;
         }
 
+        /* Кнопка "Назад" */
+        .back-to-create-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: transparent;
+            border: 1px dashed #8b0000;
+            border-radius: 40px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            color: #ffa0a0;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+            font-size: 0.95rem;
+        }
+        
+        .back-to-create-btn:hover {
+            background: #1a0000;
+            border-color: #f00;
+            color: white;
+        }
+        
+        .back-to-create-btn span {
+            font-size: 1.2rem;
+        }
+
         /* Форма отправки */
         .form-group {
             margin-bottom: 18px;
@@ -513,6 +541,11 @@
 
         <!-- РЕЖИМ 2: ОТПРАВКА СООБЩЕНИЯ -->
         <div id="sendSection" class="section section-hidden">
+            <!-- Кнопка возврата в режим создания -->
+            <button id="backToCreateBtn" class="back-to-create-btn">
+                <span>←</span> ВЕРНУТЬСЯ К СОЗДАНИЮ ССЫЛКИ
+            </button>
+            
             <!-- Блок получателя -->
             <div class="user-id-block" style="margin-bottom: 20px;">
                 <span class="user-id-label">ПОЛУЧАТЕЛЬ:</span>
@@ -593,6 +626,9 @@
         const userAvatar = document.getElementById('userAvatar');
         const userName = document.getElementById('userName');
         const logoutBtn = document.getElementById('logoutBtn');
+        
+        // Кнопка возврата
+        const backToCreateBtn = document.getElementById('backToCreateBtn');
 
         // ============================================
         // ФУНКЦИЯ ОБРАБОТКИ TELEGRAM LOGIN
@@ -659,6 +695,35 @@
         });
 
         // ============================================
+        // ФУНКЦИИ ДЛЯ ПЕРЕКЛЮЧЕНИЯ МЕЖДУ РЕЖИМАМИ
+        // ============================================
+        function switchToCreateMode() {
+            modeCreateBtn.classList.add('active');
+            modeSendBtn.classList.remove('active');
+            createSection.classList.remove('section-hidden');
+            sendSection.classList.add('section-hidden');
+            
+            // Убираем id из URL
+            const url = new URL(window.location.href);
+            url.searchParams.delete('id');
+            window.history.replaceState({}, '', url);
+        }
+        
+        function switchToSendMode() {
+            if (!currentUserId) {
+                showToast('⚠️ Сначала создай свою ссылку');
+                return false;
+            }
+            
+            modeCreateBtn.classList.remove('active');
+            modeSendBtn.classList.add('active');
+            createSection.classList.add('section-hidden');
+            sendSection.classList.remove('section-hidden');
+            receiverId.textContent = currentUserId;
+            return true;
+        }
+
+        // ============================================
         // ПРОВЕРКА URL ПРИ ЗАГРУЗКЕ
         // ============================================
         function checkUrlForId() {
@@ -678,32 +743,14 @@
         }
 
         // ============================================
-        // ПЕРЕКЛЮЧЕНИЕ РЕЖИМОВ
+        // ОБРАБОТЧИКИ КНОПОК РЕЖИМОВ
         // ============================================
-        modeCreateBtn.addEventListener('click', () => {
-            modeCreateBtn.classList.add('active');
-            modeSendBtn.classList.remove('active');
-            createSection.classList.remove('section-hidden');
-            sendSection.classList.add('section-hidden');
-            
-            // Убираем id из URL
-            const url = new URL(window.location.href);
-            url.searchParams.delete('id');
-            window.history.replaceState({}, '', url);
-        });
+        modeCreateBtn.addEventListener('click', switchToCreateMode);
 
-        modeSendBtn.addEventListener('click', () => {
-            if (!currentUserId) {
-                showToast('⚠️ Сначала создай свою ссылку');
-                return;
-            }
-            
-            modeCreateBtn.classList.remove('active');
-            modeSendBtn.classList.add('active');
-            createSection.classList.add('section-hidden');
-            sendSection.classList.remove('section-hidden');
-            receiverId.textContent = currentUserId;
-        });
+        modeSendBtn.addEventListener('click', switchToSendMode);
+        
+        // Обработчик кнопки "Вернуться к созданию ссылки"
+        backToCreateBtn.addEventListener('click', switchToCreateMode);
 
         // ============================================
         // СОЗДАНИЕ ССЫЛКИ ПО ID
