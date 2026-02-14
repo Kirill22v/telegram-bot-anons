@@ -222,38 +222,7 @@
             color: white;
         }
 
-        /* Telegram Login кнопка */
-        .telegram-login-container {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-            min-height: 60px;
-        }
-        
-        .telegram-login-container iframe {
-            border-radius: 40px !important;
-            overflow: hidden;
-            box-shadow: 0 0 20px #f00;
-            max-width: 100%;
-        }
-        
-        .telegram-login-error {
-            text-align: center;
-            color: #ff6b6b;
-            background: #2a0000;
-            padding: 15px;
-            border-radius: 20px;
-            margin: 10px 0;
-            font-size: 0.9rem;
-            border: 1px solid #f00;
-        }
-        
-        .telegram-login-error a {
-            color: #ffb3b3;
-            text-decoration: none;
-            border-bottom: 1px dashed #f00;
-        }
-        
+        /* Информация о пользователе */
         .user-info {
             display: flex;
             align-items: center;
@@ -293,29 +262,6 @@
         .logout-btn:hover {
             background: #3f0000;
             color: white;
-        }
-
-        /* Альтернативная кнопка для входа */
-        .telegram-alternative-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            background: #2a0000;
-            border: 1px solid #f00;
-            border-radius: 40px;
-            padding: 12px 20px;
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: 0.2s;
-            margin: 15px 0;
-        }
-        
-        .telegram-alternative-btn:hover {
-            background: #3f0000;
-            box-shadow: 0 0 15px #f00;
-            transform: translateY(-2px);
         }
 
         /* Кнопка "Назад" */
@@ -534,24 +480,8 @@
         <div id="createSection" class="section">
             <div class="user-card">
                 <div style="margin-bottom: 15px; color: #ff8a8a; text-align: center;">
-                    Войди в Telegram, чтобы получить ссылку
+                    Введи свой Telegram ID, чтобы получить ссылку
                 </div>
-                
-                <!-- Telegram Login Widget -->
-                <div id="telegramLoginContainer" class="telegram-login-container">
-                    <!-- Сюда будет вставлен виджет через JS -->
-                </div>
-                
-                <!-- Сообщение об ошибке домена -->
-                <div id="domainErrorBlock" style="display: none;" class="telegram-login-error">
-                    ⚠️ Для использования кнопки входа нужно настроить домен в @BotFather<br>
-                    <a href="https://t.me/BotFather" target="_blank">Перейти в BotFather →</a>
-                </div>
-                
-                <!-- Альтернативная кнопка для входа через бота -->
-                <a href="https://t.me/anonimni_soo_bot?start=auth" target="_blank" class="telegram-alternative-btn" id="alternativeTelegramBtn">
-                    <span>🔐</span> ВОЙТИ ЧЕРЕЗ БОТА
-                </a>
                 
                 <!-- Информация о пользователе после входа -->
                 <div id="userInfoBlock" style="display: none;" class="user-info">
@@ -560,17 +490,17 @@
                     <button id="logoutBtn" class="logout-btn">Выйти</button>
                 </div>
 
-                <div style="color: #aaa; font-size: 0.9rem; text-align: center; margin: 20px 0;">
-                    или введи свой Telegram ID вручную:
-                </div>
-
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <input type="number" id="manualUserId" placeholder="Например: 2040361118" style="flex: 1; min-width: 180px;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+                    <input type="number" id="manualUserId" placeholder="Твой Telegram ID (только цифры)" style="flex: 1; min-width: 180px;">
                     <button class="copy-btn" id="createFromIdBtn">СОЗДАТЬ</button>
+                </div>
+                
+                <div style="color: #aaa; font-size: 0.8rem; text-align: center; margin-top: 15px;">
+                    🔍 Как узнать свой ID? Напиши боту <a href="https://t.me/userinfobot" target="_blank" style="color: #ffb3b3;">@userinfobot</a>
                 </div>
             </div>
 
-            <!-- Результат создания (показывается после входа) -->
+            <!-- Результат создания (показывается после ввода ID) -->
             <div id="resultBlock" style="display: none;">
                 <div class="user-id-block">
                     <span class="user-id-label">ТВОЙ ID:</span>
@@ -643,14 +573,11 @@
         const BOT_TOKEN = '8356857351:AAEREqNnXrrWC2tskKd1OM6uHSnOFJZ4IDU';  // ТВОЙ БОТ
         const BOT_USERNAME = 'anonimni_soo_bot';  // ЮЗЕРНЕЙМ БОТА (без @)
         
-        // Текущий домен сайта
-        const CURRENT_DOMAIN = window.location.hostname;
-        
         // ============================================
         // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
         // ============================================
         let currentUserId = null;  // ID текущего пользователя
-        let currentUser = null;    // Данные пользователя из Telegram
+        let currentUser = null;    // Данные пользователя
         
         // Элементы
         const modeCreateBtn = document.getElementById('modeCreateBtn');
@@ -674,10 +601,7 @@
         const statusTime = document.getElementById('statusTime');
         const toast = document.getElementById('toast');
         
-        // Элементы для Telegram Login
-        const telegramLoginContainer = document.getElementById('telegramLoginContainer');
-        const domainErrorBlock = document.getElementById('domainErrorBlock');
-        const alternativeTelegramBtn = document.getElementById('alternativeTelegramBtn');
+        // Элементы для информации о пользователе
         const userInfoBlock = document.getElementById('userInfoBlock');
         const userAvatar = document.getElementById('userAvatar');
         const userName = document.getElementById('userName');
@@ -685,101 +609,6 @@
         
         // Кнопка возврата
         const backToCreateBtn = document.getElementById('backToCreateBtn');
-
-        // ============================================
-        // ФУНКЦИЯ ОБРАБОТКИ TELEGRAM LOGIN
-        // ============================================
-        window.onTelegramAuth = function(user) {
-            console.log('Telegram auth success:', user);
-            
-            // Сохраняем данные пользователя
-            currentUser = user;
-            currentUserId = user.id;
-            
-            // Показываем информацию о пользователе
-            userName.textContent = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-            if (user.photo_url) {
-                userAvatar.src = user.photo_url;
-            } else {
-                // Аватар по умолчанию (инициалы)
-                const initials = (user.first_name ? user.first_name[0] : '') + (user.last_name ? user.last_name[0] : '');
-                userAvatar.src = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#8b0000"/><text x="50" y="70" font-size="50" text-anchor="middle" fill="white" font-family="Arial" dominant-baseline="middle">' + (initials || '👤') + '</text></svg>');
-            }
-            
-            // Скрываем виджет и альтернативную кнопку, показываем информацию
-            telegramLoginContainer.style.display = 'none';
-            alternativeTelegramBtn.style.display = 'none';
-            domainErrorBlock.style.display = 'none';
-            userInfoBlock.style.display = 'flex';
-            
-            // Создаем ссылку
-            createLinkForUser(user.id);
-            
-            showToast(`✅ Добро пожаловать, ${user.first_name}!`);
-        };
-
-        // Инициализация Telegram Login
-        function initTelegramLogin() {
-            // Проверяем, не локальный ли это домен
-            if (CURRENT_DOMAIN === 'localhost' || CURRENT_DOMAIN === '127.0.0.1') {
-                // Для локальной разработки показываем альтернативную кнопку
-                telegramLoginContainer.style.display = 'none';
-                alternativeTelegramBtn.style.display = 'flex';
-                domainErrorBlock.style.display = 'block';
-                return;
-            }
-            
-            // Очищаем контейнер
-            telegramLoginContainer.innerHTML = '';
-            
-            // Создаем скрипт Telegram Widget
-            const script = document.createElement('script');
-            script.src = 'https://telegram.org/js/telegram-widget.js?22';
-            script.setAttribute('data-telegram-login', BOT_USERNAME);
-            script.setAttribute('data-size', 'large');
-            script.setAttribute('data-radius', '20');
-            script.setAttribute('data-request-access', 'write');
-            script.setAttribute('data-userpic', 'false');
-            script.setAttribute('data-callback', 'onTelegramAuth');
-            script.setAttribute('data-onauth', 'onTelegramAuth(user)');
-            
-            // Обработчик ошибки загрузки виджета
-            script.onerror = function() {
-                telegramLoginContainer.style.display = 'none';
-                alternativeTelegramBtn.style.display = 'flex';
-                domainErrorBlock.style.display = 'block';
-            };
-            
-            telegramLoginContainer.appendChild(script);
-            
-            // Таймер для проверки, загрузился ли виджет
-            setTimeout(() => {
-                if (telegramLoginContainer.children.length > 0 && !telegramLoginContainer.querySelector('iframe')) {
-                    // Виджет не создал iframe - возможно проблема с доменом
-                    telegramLoginContainer.style.display = 'none';
-                    alternativeTelegramBtn.style.display = 'flex';
-                    domainErrorBlock.style.display = 'block';
-                }
-            }, 3000);
-        }
-
-        // Выход
-        logoutBtn.addEventListener('click', () => {
-            currentUser = null;
-            currentUserId = null;
-            localStorage.removeItem('userId');
-            
-            telegramLoginContainer.style.display = 'block';
-            alternativeTelegramBtn.style.display = 'flex';
-            domainErrorBlock.style.display = 'none';
-            userInfoBlock.style.display = 'none';
-            resultBlock.style.display = 'none';
-            
-            // Переинициализируем виджет
-            initTelegramLogin();
-            
-            showToast('👋 Вы вышли');
-        });
 
         // ============================================
         // ФУНКЦИИ ДЛЯ ПЕРЕКЛЮЧЕНИЯ МЕЖДУ РЕЖИМАМИ
@@ -833,7 +662,6 @@
         // ОБРАБОТЧИКИ КНОПОК РЕЖИМОВ
         // ============================================
         modeCreateBtn.addEventListener('click', switchToCreateMode);
-
         modeSendBtn.addEventListener('click', switchToSendMode);
         
         // Обработчик кнопки "Вернуться к созданию ссылки"
@@ -993,19 +821,6 @@
                 createLinkForUser(savedId);
             }
         }
-
-        // Инициализируем Telegram Login
-        initTelegramLogin();
-
-        // Проверяем, есть ли сохраненные данные пользователя
-        if (currentUserId) {
-            telegramLoginContainer.style.display = 'none';
-            alternativeTelegramBtn.style.display = 'none';
-            userInfoBlock.style.display = 'flex';
-        }
-        
-        // Показываем информацию о текущем домене (для отладки)
-        console.log('Current domain:', CURRENT_DOMAIN);
     </script>
 </body>
 </html>
