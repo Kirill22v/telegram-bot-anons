@@ -237,6 +237,23 @@
             max-width: 100%;
         }
         
+        .telegram-login-error {
+            text-align: center;
+            color: #ff6b6b;
+            background: #2a0000;
+            padding: 15px;
+            border-radius: 20px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+            border: 1px solid #f00;
+        }
+        
+        .telegram-login-error a {
+            color: #ffb3b3;
+            text-decoration: none;
+            border-bottom: 1px dashed #f00;
+        }
+        
         .user-info {
             display: flex;
             align-items: center;
@@ -276,6 +293,29 @@
         .logout-btn:hover {
             background: #3f0000;
             color: white;
+        }
+
+        /* Альтернативная кнопка для входа */
+        .telegram-alternative-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: #2a0000;
+            border: 1px solid #f00;
+            border-radius: 40px;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.2s;
+            margin: 15px 0;
+        }
+        
+        .telegram-alternative-btn:hover {
+            background: #3f0000;
+            box-shadow: 0 0 15px #f00;
+            transform: translateY(-2px);
         }
 
         /* Кнопка "Назад" */
@@ -502,6 +542,17 @@
                     <!-- Сюда будет вставлен виджет через JS -->
                 </div>
                 
+                <!-- Сообщение об ошибке домена -->
+                <div id="domainErrorBlock" style="display: none;" class="telegram-login-error">
+                    ⚠️ Для использования кнопки входа нужно настроить домен в @BotFather<br>
+                    <a href="https://t.me/BotFather" target="_blank">Перейти в BotFather →</a>
+                </div>
+                
+                <!-- Альтернативная кнопка для входа через бота -->
+                <a href="https://t.me/anonimni_soo_bot?start=auth" target="_blank" class="telegram-alternative-btn" id="alternativeTelegramBtn">
+                    <span>🔐</span> ВОЙТИ ЧЕРЕЗ БОТА
+                </a>
+                
                 <!-- Информация о пользователе после входа -->
                 <div id="userInfoBlock" style="display: none;" class="user-info">
                     <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
@@ -592,6 +643,9 @@
         const BOT_TOKEN = '8356857351:AAEREqNnXrrWC2tskKd1OM6uHSnOFJZ4IDU';  // ТВОЙ БОТ
         const BOT_USERNAME = 'anonimni_soo_bot';  // ЮЗЕРНЕЙМ БОТА (без @)
         
+        // Текущий домен сайта
+        const CURRENT_DOMAIN = window.location.hostname;
+        
         // ============================================
         // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
         // ============================================
@@ -622,6 +676,8 @@
         
         // Элементы для Telegram Login
         const telegramLoginContainer = document.getElementById('telegramLoginContainer');
+        const domainErrorBlock = document.getElementById('domainErrorBlock');
+        const alternativeTelegramBtn = document.getElementById('alternativeTelegramBtn');
         const userInfoBlock = document.getElementById('userInfoBlock');
         const userAvatar = document.getElementById('userAvatar');
         const userName = document.getElementById('userName');
@@ -650,8 +706,10 @@
                 userAvatar.src = 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#8b0000"/><text x="50" y="70" font-size="50" text-anchor="middle" fill="white" font-family="Arial" dominant-baseline="middle">' + (initials || '👤') + '</text></svg>');
             }
             
-            // Скрываем виджет, показываем информацию
+            // Скрываем виджет и альтернативную кнопку, показываем информацию
             telegramLoginContainer.style.display = 'none';
+            alternativeTelegramBtn.style.display = 'none';
+            domainErrorBlock.style.display = 'none';
             userInfoBlock.style.display = 'flex';
             
             // Создаем ссылку
@@ -662,6 +720,15 @@
 
         // Инициализация Telegram Login
         function initTelegramLogin() {
+            // Проверяем, не локальный ли это домен
+            if (CURRENT_DOMAIN === 'localhost' || CURRENT_DOMAIN === '127.0.0.1') {
+                // Для локальной разработки показываем альтернативную кнопку
+                telegramLoginContainer.style.display = 'none';
+                alternativeTelegramBtn.style.display = 'flex';
+                domainErrorBlock.style.display = 'block';
+                return;
+            }
+            
             // Очищаем контейнер
             telegramLoginContainer.innerHTML = '';
             
@@ -675,7 +742,25 @@
             script.setAttribute('data-userpic', 'false');
             script.setAttribute('data-callback', 'onTelegramAuth');
             script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+            
+            // Обработчик ошибки загрузки виджета
+            script.onerror = function() {
+                telegramLoginContainer.style.display = 'none';
+                alternativeTelegramBtn.style.display = 'flex';
+                domainErrorBlock.style.display = 'block';
+            };
+            
             telegramLoginContainer.appendChild(script);
+            
+            // Таймер для проверки, загрузился ли виджет
+            setTimeout(() => {
+                if (telegramLoginContainer.children.length > 0 && !telegramLoginContainer.querySelector('iframe')) {
+                    // Виджет не создал iframe - возможно проблема с доменом
+                    telegramLoginContainer.style.display = 'none';
+                    alternativeTelegramBtn.style.display = 'flex';
+                    domainErrorBlock.style.display = 'block';
+                }
+            }, 3000);
         }
 
         // Выход
@@ -685,6 +770,8 @@
             localStorage.removeItem('userId');
             
             telegramLoginContainer.style.display = 'block';
+            alternativeTelegramBtn.style.display = 'flex';
+            domainErrorBlock.style.display = 'none';
             userInfoBlock.style.display = 'none';
             resultBlock.style.display = 'none';
             
@@ -913,8 +1000,12 @@
         // Проверяем, есть ли сохраненные данные пользователя
         if (currentUserId) {
             telegramLoginContainer.style.display = 'none';
-            // Здесь можно было бы восстановить сессию, но для простоты показываем ручной режим
+            alternativeTelegramBtn.style.display = 'none';
+            userInfoBlock.style.display = 'flex';
         }
+        
+        // Показываем информацию о текущем домене (для отладки)
+        console.log('Current domain:', CURRENT_DOMAIN);
     </script>
 </body>
 </html>
