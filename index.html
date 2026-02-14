@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анонимный бот • Создай свою ссылку</title>
+    <style>
+        /* ========== КРАСНО-ЧЕРНЫЙ СТИЛЬ ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+        .gradient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #000000, #1f0000, #3a0000, #1f0000, #000000);
+            background-size: 400% 400%;
+            animation: gradientFlow 15s ease infinite;
+            z-index: -1;
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% 0%; }
+            50% { background-position: 100% 100%; }
+            100% { background-position: 0% 0%; }
+        }
+
+        .card {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(8, 8, 8, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #8b0000;
+            border-radius: 36px;
+            padding: 40px 35px;
+            box-shadow: 0 20px 40px -10px #ff000080, 0 0 30px #ff000040;
+            transition: all 0.3s;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-weight: 300;
+            letter-spacing: 6px;
+            font-size: 2rem;
+            text-shadow: 0 0 15px #f00;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #a00;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+        }
+
+        /* Режимы */
+        .mode-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            background: #1a0000;
+            border: 1px solid #8b0000;
+            border-radius: 40px;
+            padding: 12px;
+            color: #aaa;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: center;
+        }
+
+        .mode-btn.active {
+            background: #3f0000;
+            border-color: #f00;
+            color: white;
+            box-shadow: 0 0 15px #f00;
+        }
+
+        /* Блоки */
+        .section {
+            transition: 0.3s;
+        }
+
+        .section-hidden {
+            display: none;
+        }
+
+        /* Карточка пользователя */
+        .user-card {
+            background: #0a0a0a;
+            border: 1px solid #8b0000;
+            border-radius: 30px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .user-id-block {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #1a0000;
+            border-radius: 50px;
+            padding: 12px 18px;
+            margin-bottom: 15px;
+        }
+
+        .user-id-label {
+            color: #ff8a8a;
+            font-size: 0.9rem;
+        }
+
+        .user-id-value {
+            background: #2a0000;
+            padding: 5px 15px;
+            border-radius: 30px;
+            color: #ffb3b3;
+            font-weight: 600;
+            border: 1px solid #a00;
+        }
+
+        .share-link-block {
+            display: flex;
+            gap: 10px;
+        }
+
+        .share-link-input {
+            flex: 1;
+            background: #111;
+            border: 1px solid #8b0000;
+            border-radius: 30px;
+            padding: 12px 18px;
+            color: white;
+            font-size: 0.8rem;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            background: #2a0000;
+            border: 1px solid #8b0000;
+            border-radius: 30px;
+            padding: 0 20px;
+            color: #ffa0a0;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .copy-btn:hover {
+            background: #3f0000;
+            border-color: #f00;
+            color: white;
+        }
+
+        /* Форма отправки */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #bbb;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+            margin-left: 5px;
+        }
+
+        textarea, input {
+            width: 100%;
+            background: #111;
+            border: 1px solid #8b0000;
+            border-radius: 24px;
+            padding: 14px 20px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        textarea:focus, input:focus {
+            border-color: #f00;
+            box-shadow: 0 0 10px #f00;
+            background: #1a1a1a;
+        }
+
+        .captcha-box {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .captcha-question {
+            background: #2a0000;
+            border: 1px solid #a00;
+            border-radius: 20px;
+            padding: 10px 18px;
+            color: #ffb3b3;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .send-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #1f0000, #3f0000);
+            border: 1px solid #8b0000;
+            border-radius: 40px;
+            padding: 16px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 500;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 15px;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #3f0000, #5f0000);
+            box-shadow: 0 5px 20px #f00;
+            transform: translateY(-2px);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Статус */
+        .status-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 24px;
+            background: #0a0a0a;
+            border-left: 4px solid #f00;
+            border: 1px solid #8b0000;
+            color: #ddd;
+            transition: 0.3s;
+        }
+
+        .status-hidden {
+            opacity: 0;
+            visibility: hidden;
+            position: absolute;
+        }
+
+        .status-time {
+            color: #666;
+            font-size: 0.7rem;
+            text-align: right;
+            margin-top: 5px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a0000;
+            border: 1px solid #f00;
+            border-radius: 50px;
+            padding: 12px 25px;
+            color: white;
+            box-shadow: 0 0 30px #f00;
+            transition: 0.3s;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 1000;
+        }
+
+        .toast-show {
+            opacity: 1;
+            visibility: visible;
+            bottom: 50px;
+        }
+
+        .help-text {
+            color: #5a5a5a;
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 20px;
+            border-top: 1px dashed #8b0000;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-bg"></div>
+
+    <div class="card">
+        <h1>✧ Anonymous ✧</h1>
+        <div class="subtitle">анонимные сообщения</div>
+
+        <!-- Переключатель режимов -->
+        <div class="mode-tabs">
+            <div class="mode-btn active" id="modeCreateBtn">✨ СОЗДАТЬ ССЫЛКУ</div>
+            <div class="mode-btn" id="modeSendBtn">📨 ОТПРАВИТЬ</div>
+        </div>
+
+        <!-- РЕЖИМ 1: СОЗДАНИЕ ССЫЛКИ -->
+        <div id="createSection" class="section">
+            <div class="user-card">
+                <div style="margin-bottom: 15px; color: #ff8a8a; text-align: center;">
+                    Войди в Telegram, чтобы получить ссылку
+                </div>
+                
+                <!-- Telegram login (упрощенный) -->
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <a href="https://t.me/anonimni_soo_bot=create" target="_blank" style="display: inline-block; background: #2a0000; border: 1px solid #8b0000; border-radius: 40px; padding: 12px 30px; color: white; text-decoration: none; font-weight: 500; transition: 0.2s;">
+                        🔐 ВОЙТИ ЧЕРЕЗ TELEGRAM
+                    </a>
+                </div>
+
+                <div style="color: #aaa; font-size: 0.9rem; text-align: center; margin: 20px 0;">
+                    или введи свой Telegram ID вручную:
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <input type="number" id="manualUserId" placeholder="Например: 2040361118" style="flex: 1;">
+                    <button class="copy-btn" id="createFromIdBtn">СОЗДАТЬ</button>
+                </div>
+            </div>
+
+            <!-- Результат создания (показывается после входа) -->
+            <div id="resultBlock" style="display: none;">
+                <div class="user-id-block">
+                    <span class="user-id-label">ТВОЙ ID:</span>
+                    <span class="user-id-value" id="displayUserId">-</span>
+                </div>
+
+                <div style="margin-bottom: 10px; color: #aaa; font-size: 0.8rem;">Твоя уникальная ссылка:</div>
+                <div class="share-link-block">
+                    <div class="share-link-input" id="userShareLink">загрузка...</div>
+                    <button class="copy-btn" id="copyShareLinkBtn">📋</button>
+                </div>
+
+                <div style="margin-top: 20px; padding: 15px; background: #1a0000; border-radius: 20px; color: #ffb3b3; font-size: 0.8rem; text-align: center;">
+                    ✦ Отправь эту ссылку друзьям ✦<br>
+                    Все сообщения придут тебе в Telegram
+                </div>
+            </div>
+        </div>
+
+        <!-- РЕЖИМ 2: ОТПРАВКА СООБЩЕНИЯ -->
+        <div id="sendSection" class="section section-hidden">
+            <!-- Блок получателя -->
+            <div class="user-id-block" style="margin-bottom: 20px;">
+                <span class="user-id-label">ПОЛУЧАТЕЛЬ:</span>
+                <span class="user-id-value" id="receiverId">-</span>
+            </div>
+
+            <form id="messageForm">
+                <div class="form-group">
+                    <label>твое сообщение</label>
+                    <textarea id="message" placeholder="Напиши что хочешь..." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>антибот (2+2 = ?)</label>
+                    <div class="captcha-box">
+                        <span class="captcha-question">2 + 2 =</span>
+                        <input type="number" id="captcha" placeholder="4" required min="0" max="9">
+                    </div>
+                </div>
+
+                <button type="submit" class="send-btn" id="sendMsgBtn">отправить</button>
+            </form>
+        </div>
+
+        <!-- Статус сообщения -->
+        <div id="statusBox" class="status-box status-hidden">
+            <span id="statusIcon">◈</span>
+            <span id="statusText"></span>
+            <div class="status-time" id="statusTime"></div>
+        </div>
+
+        <div class="help-text">
+            ◈ каждый получает свою ссылку ◈
+        </div>
+    </div>
+
+    <!-- Тосты -->
+    <div id="toast" class="toast">Скопировано!</div>
+
+    <script>
+        // ============================================
+        // НАСТРОЙКИ (один общий бот для всех)
+        // ============================================
+        const BOT_TOKEN = '8356857351:AAEREqNnXrrWC2tskKd1OM6uHSnOFJZ4IDU';  // ← ТВОЙ БОТ (общий)
+        
+        // ============================================
+        // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+        // ============================================
+        let currentUserId = null;  // ID текущего пользователя (кто зашел на сайт)
+        
+        // Элементы
+        const modeCreateBtn = document.getElementById('modeCreateBtn');
+        const modeSendBtn = document.getElementById('modeSendBtn');
+        const createSection = document.getElementById('createSection');
+        const sendSection = document.getElementById('sendSection');
+        const resultBlock = document.getElementById('resultBlock');
+        const displayUserId = document.getElementById('displayUserId');
+        const userShareLink = document.getElementById('userShareLink');
+        const copyShareLinkBtn = document.getElementById('copyShareLinkBtn');
+        const manualUserId = document.getElementById('manualUserId');
+        const createFromIdBtn = document.getElementById('createFromIdBtn');
+        const receiverId = document.getElementById('receiverId');
+        const messageForm = document.getElementById('messageForm');
+        const messageInput = document.getElementById('message');
+        const captchaInput = document.getElementById('captcha');
+        const sendMsgBtn = document.getElementById('sendMsgBtn');
+        const statusBox = document.getElementById('statusBox');
+        const statusIcon = document.getElementById('statusIcon');
+        const statusText = document.getElementById('statusText');
+        const statusTime = document.getElementById('statusTime');
+        const toast = document.getElementById('toast');
+
+        // ============================================
+        // ПРОВЕРКА URL ПРИ ЗАГРУЗКЕ
+        // ============================================
+        function checkUrlForId() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            
+            if (id && /^\d+$/.test(id)) {
+                // Есть ID в ссылке - переключаемся в режим отправки
+                receiverId.textContent = id;
+                modeCreateBtn.classList.remove('active');
+                modeSendBtn.classList.add('active');
+                createSection.classList.add('section-hidden');
+                sendSection.classList.remove('section-hidden');
+                return true;
+            }
+            return false;
+        }
+
+        // ============================================
+        // ПЕРЕКЛЮЧЕНИЕ РЕЖИМОВ
+        // ============================================
+        modeCreateBtn.addEventListener('click', () => {
+            modeCreateBtn.classList.add('active');
+            modeSendBtn.classList.remove('active');
+            createSection.classList.remove('section-hidden');
+            sendSection.classList.add('section-hidden');
+            
+            // Убираем id из URL
+            const url = new URL(window.location.href);
+            url.searchParams.delete('id');
+            window.history.replaceState({}, '', url);
+        });
+
+        modeSendBtn.addEventListener('click', () => {
+            if (!currentUserId) {
+                showToast('⚠️ Сначала создай свою ссылку');
+                return;
+            }
+            
+            modeCreateBtn.classList.remove('active');
+            modeSendBtn.classList.add('active');
+            createSection.classList.add('section-hidden');
+            sendSection.classList.remove('section-hidden');
+            receiverId.textContent = currentUserId;
+        });
+
+        // ============================================
+        // СОЗДАНИЕ ССЫЛКИ ПО ID
+        // ============================================
+        function createLinkForUser(userId) {
+            currentUserId = userId;
+            displayUserId.textContent = userId;
+            
+            // Формируем ссылку
+            const url = new URL(window.location.href);
+            url.searchParams.set('id', userId);
+            const shareLink = url.toString();
+            userShareLink.textContent = shareLink;
+            
+            // Показываем результат
+            resultBlock.style.display = 'block';
+            
+            // Обновляем кнопку отправки
+            receiverId.textContent = userId;
+        }
+
+        createFromIdBtn.addEventListener('click', () => {
+            const userId = manualUserId.value.trim();
+            
+            if (!userId || !/^\d+$/.test(userId)) {
+                showToast('❌ Введите корректный Telegram ID (только цифры)');
+                return;
+            }
+            
+            createLinkForUser(userId);
+            showToast('✅ Ссылка создана!');
+        });
+
+        // Копирование ссылки
+        copyShareLinkBtn.addEventListener('click', () => {
+            const link = userShareLink.textContent;
+            if (link && link !== 'загрузка...') {
+                navigator.clipboard.writeText(link).then(() => {
+                    showToast('✅ Ссылка скопирована!');
+                });
+            }
+        });
+
+        // ============================================
+        // ОТПРАВКА СООБЩЕНИЯ
+        // ============================================
+        messageForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const targetId = receiverId.textContent;
+            const message = messageInput.value.trim();
+            const captcha = captchaInput.value.trim();
+
+            if (!message) {
+                setStatus('⚠️', 'Напишите сообщение', false);
+                return;
+            }
+
+            if (captcha !== '4') {
+                setStatus('✘', 'Неверная капча', false);
+                return;
+            }
+
+            if (!targetId || targetId === '-') {
+                setStatus('✗', 'Не указан получатель', false);
+                return;
+            }
+
+            sendMsgBtn.disabled = true;
+            sendMsgBtn.textContent = 'отправка...';
+            setStatus('⏳', 'Отправляется...', false);
+
+            const text = `🔮 Анонимное сообщение:\n\n«${message}»\n\n🕒 ${new Date().toLocaleString('ru-RU')}`;
+
+            try {
+                const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        chat_id: targetId,
+                        text: text
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.ok) {
+                    setStatus('✓', 'Сообщение доставлено!', true);
+                    messageInput.value = '';
+                    captchaInput.value = '';
+                } else {
+                    setStatus('✗', 'Ошибка: пользователь не начал диалог с ботом', false);
+                }
+            } catch (error) {
+                setStatus('✗', 'Ошибка соединения', false);
+            } finally {
+                sendMsgBtn.disabled = false;
+                sendMsgBtn.textContent = 'отправить';
+            }
+        });
+
+        // ============================================
+        // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+        // ============================================
+        function setStatus(icon, text, autoHide = true) {
+            statusIcon.textContent = icon;
+            statusText.textContent = text;
+            statusTime.textContent = new Date().toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+            statusBox.classList.remove('status-hidden');
+            
+            if (autoHide) {
+                setTimeout(() => {
+                    statusBox.classList.add('status-hidden');
+                }, 5000);
+            }
+        }
+
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('toast-show');
+            setTimeout(() => {
+                toast.classList.remove('toast-show');
+            }, 2000);
+        }
+
+        // Ограничение капчи
+        captchaInput.addEventListener('keydown', (e) => {
+            if (e.key === 'e' || e.key === '-' || e.key === '.') e.preventDefault();
+        });
+
+        // ============================================
+        // ИНИЦИАЛИЗАЦИЯ
+        // ============================================
+        // Проверяем URL при загрузке
+        if (!checkUrlForId()) {
+            // Если нет ID, пытаемся получить из localStorage
+            const savedId = localStorage.getItem('userId');
+            if (savedId) {
+                currentUserId = savedId;
+                displayUserId.textContent = savedId;
+                createLinkForUser(savedId);
+            }
+        }
+
+        // Эмуляция Telegram Login (для демо)
+        // В реальности здесь должна быть интеграция с Telegram Login
+        setTimeout(() => {
+            if (!currentUserId && !checkUrlForId()) {
+                // Для демо предлагаем тестовый ID
+                if (confirm('Хотите использовать тестовый ID 12345?')) {
+                    createLinkForUser('12345');
+                }
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
